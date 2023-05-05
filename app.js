@@ -35,6 +35,8 @@ const validatePassword = (password) => {
   return password.length > 5;
 };
 
+// API1
+
 app.post("/register", async (request, response) => {
   const { username, name, password, gender } = request.body;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -85,6 +87,8 @@ function authenticateToken(request, response, next) {
     });
   }
 }
+
+//API 2
 
 app.post("/login/", async (request, response) => {
   const { username, password } = request.body;
