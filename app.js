@@ -82,7 +82,7 @@ function authenticateToken(request, response, next) {
         response.status(401);
         response.send("Invalid JWT Token");
       } else {
-        request.payload = payload;
+        request.username = payload.username;
         next();
       }
     });
@@ -133,13 +133,35 @@ app.get("/user/tweets/feed/", authenticateToken, async (request, response) => {
       INNER JOIN user
       ON tweet.user_id = user.user_id
     WHERE
-      follower.follower_user_id = ${user.user_id} 
+      follower.follower_user_id = ${getUserId.user_id};
     ORDER BY
       tweet.date_time DESC
     LIMIT 4;`;
+
   const state = await database.get(tweetsQuery);
   response.send(state);
 });
+
 // API 4
-app.get("/user/following/", authenticateToken, async (request, response) => {});
+
+app.get("/user/following/", authenticateToken, async (request, response) => {
+  const { username } = request;
+  const getUserIdQuery = `SELECT user_id FROM user WHERE username='${username}';`;
+  const getUserId = await database.get(getUserIdQuery);
+
+  const tweetsQuery = `
+   SELECT
+      user.username
+   FROM
+      follower
+      INNER JOIN tweet
+      ON follower.following_user_id = tweet.user_id
+      INNER JOIN user
+      ON tweet.user_id = user.user_id
+   WHERE
+      follower.follower_user_id = ${getUserId.user_id};`;
+
+  const state = await database.get(tweetsQuery);
+  response.send(state);
+});
 module.exports = app;
