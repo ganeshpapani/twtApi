@@ -129,16 +129,15 @@ app.get("/user/tweets/feed/", authenticateToken, async (request, response) => {
    FROM
       follower
       INNER JOIN tweet
-      ON follower.following_user_id = tweet.user_id
+      ON follower.follower_user_id = tweet.user_id
       INNER JOIN user
       ON tweet.user_id = user.user_id
     WHERE
-      follower.follower_user_id = ${getUserId.user_id};
-    ORDER BY
-      tweet.date_time DESC
-    LIMIT 4;`;
+      follower.following_user_id = ${getUserId.user_id};
+    
+    ;`;
 
-  const state = await database.get(tweetsQuery);
+  const state = await database.all(tweetsQuery);
   response.send(state);
 });
 
@@ -154,14 +153,13 @@ app.get("/user/following/", authenticateToken, async (request, response) => {
       user.username
    FROM
       follower
-      INNER JOIN tweet
-      ON follower.following_user_id = tweet.user_id
       INNER JOIN user
-      ON tweet.user_id = user.user_id
+      ON follower.follower_user_id = user.user_id
+      
    WHERE
-      follower.follower_user_id = ${getUserId.user_id};`;
+      follower.following_user_id = ${getUserId.user_id};`;
 
-  const state = await database.get(tweetsQuery);
+  const state = await database.all(tweetsQuery);
   response.send(state);
 });
 module.exports = app;
